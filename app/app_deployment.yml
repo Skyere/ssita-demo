@@ -1,0 +1,100 @@
+# Remove DB in the future!
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: postgres
+
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: postgres
+  template:
+    metadata:
+      labels:
+        app: postgres
+    spec:
+      nodeSelector:
+        "kubernetes.io/os": linux
+      containers:
+      - name: postgres
+        image: postgres:12.10
+        env:
+        - name: POSTGRES_USER
+          value: "root"
+        - name: POSTGRES_PASSWORD
+          value: "root"
+        ports:
+        - containerPort: 5432
+          name: redis
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: back-end
+
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: back-end
+  template:
+    metadata:
+      labels:
+        app: back-end
+    spec:
+      nodeSelector:
+        "kubernetes.io/os": linux
+      containers:
+      - name: back-end
+        image: skyere/techua-back:release
+        resources:
+          requests:
+            cpu: 100m
+            memory: 256Mi
+          limits:
+            cpu: 250m
+            memory: 512Mi
+        env:
+        - name: JWT_SECRET
+          value: "teachuamain"
+        - name: DATASOURCE_URL
+          value: "jdbc:postgresql://postgres:5432/postgres"
+        - name: DATASOURCE_USER
+          value: "root"
+        - name: DATASOURCE_PASSWORD
+          value: "root"
+        ports:
+        - containerPort: 8080
+          name: redis
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: front-end
+
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: front-end
+  template:
+    metadata:
+      labels:
+        app: front-end
+    spec:
+      nodeSelector:
+        "kubernetes.io/os": linux
+      containers:
+      - name: front-end
+        image: skyere/techua-front:0.3
+        imagePullPolicy: "Always"
+        resources:
+          requests:
+            cpu: 100m
+            memory: 256Mi
+          limits:
+            cpu: 250m
+            memory: 512Mi
+        ports:
+        - containerPort: 80

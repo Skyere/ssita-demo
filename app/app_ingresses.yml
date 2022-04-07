@@ -1,0 +1,32 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: app-dns
+  annotations:
+    kubernetes.io/ingress.class: addon-http-application-routing
+
+spec:
+  rules:
+  # Set your dns zone
+  - host: front.adb7b56a11d444149790.eastus.aksapp.io
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service: 
+            name: front-end
+            port: 
+              number: 80
+              
+# Set your dns zone
+  - host: back.adb7b56a11d444149790.eastus.aksapp.io
+    http:
+      paths:
+      - path: /dev/api
+        pathType: Prefix
+        backend:
+          service: 
+            name: back-end
+            port: 
+              number: 80
